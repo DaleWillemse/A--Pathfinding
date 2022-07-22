@@ -28,19 +28,19 @@ class Node:
     def get_pos(self):
         return self.row, self.col
 
-    def is_closed(self):
+    def closed(self):
         return self.color == red
 
-    def is_open(self):
+    def open(self):
         return self.color == green
 
-    def is_barrier(self):
+    def barrier(self):
         return self.color == black
 
-    def is_start(self):
+    def start(self):
         return self.color == blue
 
-    def is_end(self):
+    def end(self):
         return self.color == yellow
     
     def reset(self):
