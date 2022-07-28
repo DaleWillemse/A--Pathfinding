@@ -1,6 +1,5 @@
 from string import whitespace
 import pygame
-import math 
 from queue import PriorityQueue
 
 WIDTH = 600
@@ -66,3 +65,51 @@ class Node:
 
     def draw(self, win):
         pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
+
+    def update_neighbors(self, grid):
+        self.neighborts = []
+        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].barrier():
+            self.neighborts.append(grid[self.row + 1][self.col])
+        if self.row > 0 and not grid[self.row - 1][self.col].barrier():
+            self.neighborts.append(grid[self.row - 1][self.col])
+        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].barrier():
+            self.neighborts.append(grid[self.row][self.col + 1])
+        if self.col > 0 and not grid[self.row][self.col - 1].barrier():
+            self.neighborts.append(grid[self.row][self.col - 1])
+
+    def __lt__(self, other):
+        return False
+
+
+def herostic(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
+    return abs(x1 - x2) + abs(y1 - y2)
+
+# making the grid
+def make_grid(rows, width):
+    grid = []
+    gap = width // rows
+    for i in range(rows):
+        grid.append([])
+        for j in range(rows):
+            node = Node(i, j, gap, rows)
+            grid[i].append(node)
+    return grid
+
+# drawing the grid
+def draw_grid(win, rows, width):
+    gap = width // rows
+    for i in range(rows):
+        pygame.draw.line(win, black, (0, i * gap), (width, i * gap))
+        for j in range(rows):
+            pygame.draw.line(win, black, (j * gap, 0), (j * gap, width))
+    
+def draw(win, grid, rows, width):
+    win.fill(white)
+    for row in grid:
+        for node in row:
+            node.draw(win)
+    draw_grid(win, rows, width)
+    pygame.display.update()
+
