@@ -3,7 +3,7 @@ from turtle import pos
 import pygame
 from queue import PriorityQueue
 
-WIDTH = 700
+WIDTH = 500
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption("A* Pathfinding Algorithm")
 
@@ -12,7 +12,9 @@ white = (255, 255, 255)
 green = (0, 255, 0)
 red = (255, 0, 0)   
 blue = (0, 0, 255)  
+cyan = (0, 255, 255)
 yellow = (255, 255, 0)
+purple = (255, 0, 255)
 
 class Node:
     def __init__(self, row, col, width, total_rows):
@@ -28,12 +30,6 @@ class Node:
     def get_pos(self):
         return self.row, self.col
 
-    def closed(self):
-        return self.color == red
-
-    def open(self):
-        return self.color == green
-
     def barrier(self):
         return self.color == black
 
@@ -41,7 +37,7 @@ class Node:
         return self.color == blue
 
     def end(self):
-        return self.color == yellow
+        return self.color == cyan
     
     def reset(self):
         self.color = white
@@ -50,19 +46,19 @@ class Node:
         self.color = red
     
     def make_open(self):
-        self.color = green
+        self.color = yellow
 
     def make_barrier(self):
         self.color = black
     
     def make_end(self):
-        self.color = green
+        self.color = purple
 
     def make_start(self):
-        self.color = blue
+        self.color = purple
 
     def make_path(self):
-        self.color = yellow
+        self.color = cyan
 
     def draw(self, win):
         pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
@@ -91,6 +87,12 @@ def heuristic(p1, p2):
     x2, y2 = p2
     return abs(x1 - x2) + abs(y1 - y2)
 
+def reconstruct_path(came_from, current, draw):
+    while current in came_from:
+        current = came_from[current]
+        current.make_path()
+        draw()
+
 def algorithm(draw, grid, start, end):
     count = 0
     open_set = PriorityQueue()
@@ -99,7 +101,7 @@ def algorithm(draw, grid, start, end):
     g_score = {node: float("inf") for row in grid for node in row}
     g_score[start] = 0
     f_score = {node: float("inf") for row in grid for node in row}
-    f_score[start] = heuristic(start, end)
+    f_score[start] = heuristic(start.get_pos(), end.get_pos())
 
     open_set_hash = {start}
 
@@ -111,14 +113,17 @@ def algorithm(draw, grid, start, end):
         open_set_hash.remove(current)
 
         if current == end:
+            end.make_end()
+            reconstruct_path(came_from, end, draw)
+            start.make_start()
             return True
         
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
             if temp_g_score < g_score[neighbor]:
                 came_from[neighbor] = current
-                g_score[current] = temp_g_score
-                f_score[neighbor] = temp_g_score + heuristic(neighbor, end)
+                g_score[neighbor] = temp_g_score
+                f_score[neighbor] = temp_g_score + heuristic(neighbor.get_pos(), end.get_pos())
                 if neighbor not in open_set_hash:
                     count += 1
                     open_set.put((f_score[neighbor], count, neighbor))
@@ -207,13 +212,17 @@ def main(win, width):
 
             # starting the algorithm
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and not started:
+                if event.key == pygame.K_SPACE and start and end:
                     for row in grid:
                         for node in row:
                             node.update_neighbors(grid)
                     
                     algorithm(lambda: draw(win, grid, rows, width), grid, start, end)
-                    
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    start = None
+                    end = None
+                    grid = make_grid(rows, width)       
     pygame.quit()
 
 main(WIN, WIDTH)
