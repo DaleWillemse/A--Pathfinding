@@ -80,7 +80,7 @@ class Node:
         if self.col > 0 and not grid[self.row][self.col - 1].barrier():
             self.neighbors.append(grid[self.row][self.col - 1])
 
-    def __lt__(self, other):
+    def __lt__(self):
         return False
 
 
@@ -166,7 +166,7 @@ def draw_grid(win, rows, width):
 
 
 def draw(win, grid, rows, width):
-    win.fill(white)
+    win.fill(green)
     for row in grid:
         for node in row:
             node.draw(win)
