@@ -32,7 +32,7 @@ class Node:
         return self.row, self.col
 
     def barrier(self):
-        return self.color == black
+        return self.color == green
 
     def start(self):
         return self.color == blue
@@ -47,10 +47,10 @@ class Node:
         self.color = red
 
     def make_open(self):
-        self.color = yellow
+        self.color = black
 
     def make_barrier(self):
-        self.color = black
+        self.color = green
 
     def make_end(self):
         self.color = purple
